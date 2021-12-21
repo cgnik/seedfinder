@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seeds to GEDs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" rel="stylesheet" href="w3.css">
+    <link type="text/css" rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="w3-container w3-teal">
+    <h1>Seeds Helper</h1>
+</header>
+<div class="w3-container">
+    <div class="w3-container">
+        <form id="searchForm" action="/seeds-ged" method="post" enctype="multipart/form-data">
+            <fieldset>
+                <legend>GED Search</legend>
+                <p>
+                    <label for="seeds_file">Seeds File</label>
+                    <input type="file" name="seeds_file" id="seeds_file" placeholder="select laces file" required/>
+                </p>
+                <p>
+                    <label for="ged_file">GED File</label>
+                    <input type="file" name="ged_file" id="ged_file" placeholder="select ged file" multiple required/>
+                </p>
+                <p>
+                    <label for="threshold">Match Precision</label><span>(smaller enforces more similarity)</span>
+                    <span><input type="range" id="threshold" name="threshold" min="1" max="5" value="3"
+                                 oninput="$('#rangeOutput')[0].value = this.value"/>
+                    <output id="rangeOutput">3</output>
+                        </span>
+                </p>
+                <p>
+                    <button class="btn waves-effect waves-light" type="submit" name="action"
+                            onsubmit="return submitForm(this.form);">Search
+                    </button>
+                </p>
+            </fieldset>
+        </form>
+    </div>
+    <div class="w3-container" id="response" name="response"></div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+        crossorigin="anonymous"></script>
+<script src="/lib.js" crossorigin="anonymous"></script>
+</body>
+</html>
