@@ -30,3 +30,7 @@ fieldset p label {
 fieldset * {
     margin: 4px 5px 3px 8px;
 }
+
+.result-table {
+    width: 100%;
+}

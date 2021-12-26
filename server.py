@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, send_from_directory, Response, request, redirect, flash, abort, make_response
+from flask import Flask, send_from_directory, Response, request, redirect, flash, abort, jsonify, make_response
 from werkzeug.utils import secure_filename
 
 from seeds import seeds_geds
@@ -10,7 +10,7 @@ def _server():
     app = Flask(__name__)
     app.static_url_path = 'html'
     app.static_folder = os.path.join(app.root_path, app.static_url_path)
-    app.config['UPLOAD_FOLDER'] = '/tmp'
+    app.config['UPLOAD_FOLDER'] = os.environ.get('SEEDS_FOLDER', '/tmp')
 
     def _allowed_file(filename):
         return filename is not None and '.' in filename and filename.rsplit('.', 1)[1].lower() in ['csv']
@@ -34,19 +34,30 @@ def _server():
 
     @app.route("/seeds-ged", methods=['POST'])
     def seeds_geds_process():
-        seeds = _get_file('seeds_file')
-        geds = _get_file('ged_file')
-        if not seeds or not geds:
-            flash('Must provide both seeds and GED csv files')
-            return redirect(request.url)
-        if not _allowed_file(seeds) or not _allowed_file(geds):
-            flash('Both seeds and GED files must be csv files')
-            return redirect(request.url)
-        result = seeds_geds(seeds, geds, int(request.form.get('threshold')))
-        return make_response(result.to_dict())
-        # return Response(,
-        #                 mimetype="text/csv",
-        #                 headers={"Content-disposition": "attachment; filename=seeds_in_geds.csv"})
+        seeds, geds = None, None
+        try:
+            seeds = _get_file('seeds_file')
+            geds = _get_file('ged_file')
+            if not seeds or not geds:
+                flash('Must provide both seeds and GED csv files')
+                return redirect(request.url)
+            if not _allowed_file(seeds) or not _allowed_file(geds):
+                flash('Both seeds and GED files must be csv files')
+                return redirect(request.url)
+            rows = seeds_geds(seeds, geds, int(request.form.get('threshold')))
+            result = {"{}, {}. {}".format(*row['Closest Match']): f"{row['Last']}, {row['First']}. DoB {row['DoB']}"
+                      for i, row in
+                      rows.iterrows()}
+            r = jsonify(result)
+            return r
+        except Exception as e:
+            print(e)
+        finally:
+            if seeds:
+                os.remove(seeds)
+            if geds:
+                os.remove(geds)
+        return make_response(500, 'Server error')
 
     return app
 
